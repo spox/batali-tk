@@ -17,7 +17,7 @@ module BataliTk
 
     def resolve_with_batali
       Kitchen.mutex.synchronize do
-        Chef::Batali.new(batali_file, tmpbooks_dir, logger).resolve
+        Kitchen::Provisioner::Chef::Batali.new(batali_file, tmpbooks_dir, logger).resolve
       end
     end
 
@@ -25,8 +25,6 @@ module BataliTk
 
       def included(klass)
         klass.class_eval do
-          alias_method :tk_load_needed_dependencies!, :load_needed_dependencies!
-          alias_method :load_needed_dependencies!, :batali_load_needed_dependencies!
           alias_method :tk_prepare_cookbooks, :prepare_cookbooks
           alias_method :prepare_cookbooks, :batali_prepare_cookbooks
         end
@@ -45,7 +43,7 @@ module BataliTk
     def batali_load_needed_dependencies!
       if(File.exists?(batali_file))
         debug "Batali file found at #{batali_file}, loading Batali"
-        Chef::Batali.load!(logger)
+        Kitchen::Provisioner::Chef::Batali.load!(logger)
       else
         tk_load_needed_dependencies!
       end
@@ -65,13 +63,24 @@ module BataliTk
   end
 end
 
+require 'kitchen/provisioner/base'
 require 'kitchen/provisioner/chef_base'
-require 'kitchen/provisioner/chef/common_sandbox'
 
-class Kitchen::Provisioner::ChefBase
-  include BataliTk::Base
-end
+begin
+  require 'kitchen/provisioner/chef/common_sandbox'
 
-class Kitchen::Provisioner::Chef::CommonSandbox
-  include BataliTk::Box
+  class Kitchen::Provisioner::ChefBase
+    include BataliTk::Base
+  end
+
+  class Kitchen::Provisioner::Chef::CommonSandbox
+    include BataliTk::Box
+  end
+rescue LoadError
+
+  class Kitchen::Provisioner::ChefBase
+    include BataliTk::Base
+    include BataliTk::Box
+  end
+
 end
