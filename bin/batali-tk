@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+Signal.trap("INT") { exit 1 }
+
+require 'batali-tk'
+require 'kitchen'
+require 'kitchen/cli'
+require 'kitchen/errors'
+
+Kitchen.with_friendly_errors { Kitchen::CLI.start }
