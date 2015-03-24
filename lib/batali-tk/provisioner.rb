@@ -20,6 +20,7 @@ module Kitchen
           def load!(logger=Kitchen.logger)
             begin
               require 'batali'
+              require 'stringio'
             rescue LoadError => error
               logger.fatal("Failed to load the `batali` gem! (#{e.class}: #{e})")
               raise UserError.new "Failed to load the `batali` gem! (#{e.class}: #{e}"
@@ -43,15 +44,25 @@ module Kitchen
 
         # Resolve cookbooks and install into vendor location
         def resolve
-          info "Resolving cookbook dependencies with Batali #{Batali::VERSION}..."
-          debug "Using Batail file located at: #{batail_file}"
-          Batali::Command::Update.new(
-            Smash.new(
-              :file => batali_file,
-              :path => vendor_path
-            ),
-            []
-          ).execute!
+          info "Resolving cookbook dependencies with Batali #{::Batali::VERSION}..."
+          debug "Using Batail file located at: #{batali_file}"
+          output = ''
+          begin
+            ::Batali::Command::Update.new(
+              Smash.new(
+                :file => batali_file,
+                :path => vendor_path,
+                :ui => Bogo::Ui.new(
+                  :app_name => 'Batali',
+                  :output_to => StringIO.new(output)
+                ),
+              ),
+              []
+            ).execute!
+          rescue => e
+            error "Batali failed to install cookbooks! #{e.class}: #{e}"
+            debug output
+          end
         end
 
       end
