@@ -12,5 +12,6 @@ Gem::Specification.new do |s|
   s.license = 'Apache 2.0'
   s.add_runtime_dependency 'batali'
   s.add_runtime_dependency 'test-kitchen', BataliTk::TK_CONSTRAINT
-  s.files = Dir['lib/**/**/*'] + %w(batali-tk.gemspec README.md CHANGELOG.md CONTRIBUTING.md LICENSE)
+  s.executables << 'batali-tk'
+  s.files = Dir['{lib,bin}/**/**/*'] + %w(batali-tk.gemspec README.md CHANGELOG.md CONTRIBUTING.md LICENSE)
 end
