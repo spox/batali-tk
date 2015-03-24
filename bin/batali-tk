@@ -2,9 +2,19 @@
 
 Signal.trap("INT") { exit 1 }
 
+# Force `kitchen` name so we don't end up with batali-tk branding
+require 'thor'
+
+module Thor::Base::ClassMethods
+  def basename
+    'kitchen'
+  end
+end
+
 require 'batali-tk'
 require 'kitchen'
 require 'kitchen/cli'
 require 'kitchen/errors'
+
 
 Kitchen.with_friendly_errors { Kitchen::CLI.start }
