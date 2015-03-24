@@ -1,3 +1,4 @@
 require 'batali-tk/version'
-require 'batali-tk/provisioner'
+require 'kitchen'
 require 'batali-tk/monkey'
+require 'batali-tk/provisioner'
