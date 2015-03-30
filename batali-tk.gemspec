@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.description = 'Batali support injector for test kitchen'
   s.require_path = 'lib'
   s.license = 'Apache 2.0'
-  s.add_runtime_dependency 'batali', '>= 0.1.20', '< 1'
+  s.add_runtime_dependency 'batali', '>= 0.1.21', '< 1'
   s.add_runtime_dependency 'test-kitchen', BataliTk::TK_CONSTRAINT
   s.executables << 'batali-tk'
   s.files = Dir['{lib,bin}/**/**/*'] + %w(batali-tk.gemspec README.md CHANGELOG.md CONTRIBUTING.md LICENSE)
