@@ -61,7 +61,7 @@ module Kitchen
               []
             ).execute!
             debug output
-            re
+            res
           rescue => e
             error "Batali failed to install cookbooks! #{e.class}: #{e}"
             debug output
