@@ -45,13 +45,16 @@ module Kitchen
         # Resolve cookbooks and install into vendor location
         def resolve
           info "Resolving cookbook dependencies with Batali #{::Batali::VERSION}..."
-          debug "Using Batail file located at: #{batali_file}"
+          debug "Using Batali file located at: #{batali_file}"
           output = ''
           begin
             ::Batali::Command::Update.new(
               Smash.new(
                 :file => batali_file,
                 :path => vendor_path,
+                :update => {
+                  :install => true
+                },
                 :ui => Bogo::Ui.new(
                   :app_name => 'Batali',
                   :output_to => StringIO.new(output)
@@ -61,8 +64,8 @@ module Kitchen
             ).execute!
           rescue => e
             error "Batali failed to install cookbooks! #{e.class}: #{e}"
-            debug output
           end
+          debug "Batali output:\n#{output}"
         end
 
       end
