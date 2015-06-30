@@ -52,6 +52,7 @@ module Kitchen
               Smash.new(
                 :file => batali_file,
                 :path => vendor_path,
+                :install => true,
                 :ui => Bogo::Ui.new(
                   :app_name => 'Batali',
                   :output_to => StringIO.new(output)
@@ -60,7 +61,7 @@ module Kitchen
               []
             ).execute!
             debug output
-            res
+            re
           rescue => e
             error "Batali failed to install cookbooks! #{e.class}: #{e}"
             debug output
