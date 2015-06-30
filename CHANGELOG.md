@@ -1,3 +1,8 @@
+# v0.1.4
+* [fix] Fix cookbook installation issue
+* Always send batali action output to debug
+* Bump minimum constraint on batali
+
 # v0.1.2
 * Update minimum constraint on batali dependency
 
