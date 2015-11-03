@@ -1,6 +1,45 @@
 #!/usr/bin/env ruby
 
 Signal.trap("INT") { exit 1 }
+require 'bogo'
+require 'batali'
+
+if(idx = ARGV.index('--batali-cookbook-path'))
+  _, cookbook_path = ARGV.slice!(idx, 2)
+  cookbook_info = Batali::Origin::Path.new(:name => 'metadata', :path => File.expand_path(cookbook_path))
+  cookbook_name = cookbook_info.units.first.name
+  ckbk_batali = File.join(File.expand_path(cookbook_path), 'Batali')
+  origin_batali = Batali::BFile.new(File.expand_path('./Batali'))
+  origin_batali.cookbook.delete_if{|item| item.name == cookbook_name}
+  if(File.exists?(ckbk_batali))
+    ckbk_b = Batali::BFile.new(ckbk_batali)
+    new_batali_data = MultiJson.dump(
+      MultiJson.load(
+        MultiJson.dump(ckbk_b.data)
+      ).to_smash.deep_merge(
+        MultiJson.load(
+          MultiJson.dump(origin_batali.data)
+        )
+      )
+    )
+  else
+    origin_batali.cookbook.push(Batali::BFile::Cookbook.new(:name => cookbook_name, :path => cookbook_path))
+    new_batali_data = MultiJson.dump(origin_batali.data)
+  end
+  temp_b = Bogo::EphemeralFile.new('batali-tk')
+  temp_b.write new_batali_data
+  temp_b.flush
+  ENV['KITCHEN_BATALI_FILE'] = temp_b.path
+  ENV['KITCHEN_YAML'] = File.expand_path(
+    File.join('.', cookbook_path, '.kitchen.yml')
+  )
+  puts "!! Batali test-kitchen infra-repo override for `#{cookbook_name}` @ `#{cookbook_path}`"
+end
+if(idx = ARGV.index('--batali-environment'))
+  _, environment_name = ARGV.slice!(idx, 2)
+  ENV['KITCHEN_BATALI_ENVIRONMENT'] = environment_name
+  puts "!! Batali test-kitchen infra-repo override for resolution against `#{environment_name}` environment defined constraints"
+end
 
 # Force `kitchen` name so we don't end up with batali-tk branding
 require 'thor'
@@ -15,6 +54,5 @@ require 'batali-tk'
 require 'kitchen'
 require 'kitchen/cli'
 require 'kitchen/errors'
-
 
 Kitchen.with_friendly_errors { Kitchen::CLI.start }
