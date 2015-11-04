@@ -48,9 +48,16 @@ module Kitchen
           debug "Using Batali file located at: #{batali_file}"
           output = ''
           begin
-            ::Batali::Command::Update.new(
-              Smash.new(
-                :file => batali_file,
+            FileUtils.cp(
+              batali_file,
+              File.join(
+                File.dirname(vendor_path),
+                'Batali'
+              )
+            )
+            Dir.chdir(File.dirname(vendor_path)) do
+              ::Batali::Command::Update.new(
+                Smash.new(
                 :path => vendor_path,
                 :update => {
                   :install => true,
@@ -62,8 +69,9 @@ module Kitchen
                   :output_to => StringIO.new(output)
                 ),
               ),
-              []
-            ).execute!
+                []
+              ).execute!
+            end
           rescue => e
             error "Batali failed to install cookbooks! #{e.class}: #{e}"
           end

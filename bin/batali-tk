@@ -26,9 +26,28 @@ if(idx = ARGV.index('--batali-cookbook-path'))
     origin_batali.cookbook.push(Batali::BFile::Cookbook.new(:name => cookbook_name, :path => cookbook_path))
     new_batali_data = MultiJson.dump(origin_batali.data)
   end
+
+  n_data = MultiJson.load(new_batali_data)
+
+  expander = lambda do |item|
+    if(item.is_a?(Hash))
+      item.keys.each do |k|
+        if(k == 'path')
+          item[k] = File.expand_path(item[k])
+        elsif(item[k].is_a?(Hash) || item[k].is_a?(Array))
+          expander.call(item[k])
+        end
+      end
+    elsif(item.is_a?(Array))
+      item.each{|i| expander.call(i)}
+    end
+  end
+  expander.call(n_data)
+
   temp_b = Bogo::EphemeralFile.new('batali-tk')
-  temp_b.write new_batali_data
+  temp_b.write MultiJson.dump(n_data)
   temp_b.flush
+
   ENV['KITCHEN_BATALI_FILE'] = temp_b.path
   ENV['KITCHEN_YAML'] = File.expand_path(
     File.join('.', cookbook_path, '.kitchen.yml')
@@ -55,4 +74,10 @@ require 'kitchen'
 require 'kitchen/cli'
 require 'kitchen/errors'
 
-Kitchen.with_friendly_errors { Kitchen::CLI.start }
+cwd = Dir.pwd
+begin
+  Dir.chdir(cookbook_path)
+  Kitchen.with_friendly_errors { Kitchen::CLI.start }
+ensure
+  Dir.chdir(cwd)
+end
