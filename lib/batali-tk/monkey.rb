@@ -37,7 +37,7 @@ module BataliTk
   module Base
 
     def batali_file
-      File.join(config[:kitchen_root], "Batali")
+      ENV.fetch('KITCHEN_BATALI_FILE', File.join(config[:kitchen_root], "Batali"))
     end
 
     def batali_load_needed_dependencies!

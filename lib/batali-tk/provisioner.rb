@@ -53,7 +53,9 @@ module Kitchen
                 :file => batali_file,
                 :path => vendor_path,
                 :update => {
-                  :install => true
+                  :install => true,
+                  :environment => ENV['KITCHEN_BATALI_ENVIRONMENT'],
+                  :infrastructure => false
                 },
                 :ui => Bogo::Ui.new(
                   :app_name => 'Batali',
