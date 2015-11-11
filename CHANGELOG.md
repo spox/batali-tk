@@ -1,3 +1,6 @@
+# v0.2.2
+* [fix] Only change working directory if providing cookbook path (#2)
+
 # v0.2.0
 * [enhancement] Add support for infrastructure repository style testing
 
