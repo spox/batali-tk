@@ -76,8 +76,8 @@ require 'kitchen/errors'
 
 cwd = Dir.pwd
 begin
-  Dir.chdir(cookbook_path)
+  Dir.chdir(cookbook_path) if cookbook_path
   Kitchen.with_friendly_errors { Kitchen::CLI.start }
 ensure
-  Dir.chdir(cwd)
+  Dir.chdir(cwd) if cookbook_path
 end
