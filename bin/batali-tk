@@ -3,16 +3,22 @@
 Signal.trap("INT") { exit 1 }
 require 'bogo'
 require 'batali'
+require 'tmpdir'
 
 if(idx = ARGV.index('--batali-cookbook-path'))
+  cache_path = Dir.mktmpdir('batali-tk-cache')
   _, cookbook_path = ARGV.slice!(idx, 2)
-  cookbook_info = Batali::Origin::Path.new(:name => 'metadata', :path => File.expand_path(cookbook_path))
+  cookbook_info = Batali::Origin::Path.new(
+    :name => 'metadata',
+    :path => File.expand_path(cookbook_path),
+    :cache_path => cache_path
+  )
   cookbook_name = cookbook_info.units.first.name
   ckbk_batali = File.join(File.expand_path(cookbook_path), 'Batali')
-  origin_batali = Batali::BFile.new(File.expand_path('./Batali'))
+  origin_batali = Batali::BFile.new(File.expand_path('./Batali'), cache_path)
   origin_batali.cookbook.delete_if{|item| item.name == cookbook_name}
   if(File.exists?(ckbk_batali))
-    ckbk_b = Batali::BFile.new(ckbk_batali)
+    ckbk_b = Batali::BFile.new(ckbk_batali, cache_path)
     new_batali_data = MultiJson.dump(
       MultiJson.load(
         MultiJson.dump(ckbk_b.data)
@@ -52,6 +58,7 @@ if(idx = ARGV.index('--batali-cookbook-path'))
   ENV['KITCHEN_YAML'] = File.expand_path(
     File.join('.', cookbook_path, '.kitchen.yml')
   )
+  FileUtils.rm_rf(cache_path)
   puts "!! Batali test-kitchen infra-repo override for `#{cookbook_name}` @ `#{cookbook_path}`"
 end
 if(idx = ARGV.index('--batali-environment'))
