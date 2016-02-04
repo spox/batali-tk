@@ -1,3 +1,7 @@
+# v0.2.4
+* [fix] Relative paths for single cookbook resolution
+* [fix] Use custom cache directory on ephemeral batali files in infra mode
+
 # v0.2.2
 * [fix] Only change working directory if providing cookbook path (#2)
 
