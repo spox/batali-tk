@@ -48,32 +48,53 @@ module Kitchen
           debug "Using Batali file located at: #{batali_file}"
           output = ''
           begin
-            FileUtils.cp(
-              batali_file,
-              File.join(
-                File.dirname(vendor_path),
-                'Batali'
+            if(ENV['KITCHEN_BATALI_FILE'])
+              debug 'Running Batali resolution in full vendor directory isolation'
+              FileUtils.cp(
+                batali_file,
+                File.join(
+                  File.dirname(vendor_path),
+                  'Batali'
+                )
               )
-            )
-            Dir.chdir(File.dirname(vendor_path)) do
+              Dir.chdir(File.dirname(vendor_path)) do
+                ::Batali::Command::Update.new(
+                  Smash.new(
+                    :path => vendor_path,
+                    :update => {
+                      :install => true,
+                      :environment => ENV['KITCHEN_BATALI_ENVIRONMENT'],
+                      :infrastructure => false
+                    },
+                    :ui => Bogo::Ui.new(
+                      :app_name => 'Batali',
+                      :output_to => StringIO.new(output)
+                    ),
+                  ),
+                  []
+                ).execute!
+              end
+            else
               ::Batali::Command::Update.new(
                 Smash.new(
-                :path => vendor_path,
-                :update => {
-                  :install => true,
-                  :environment => ENV['KITCHEN_BATALI_ENVIRONMENT'],
-                  :infrastructure => false
-                },
-                :ui => Bogo::Ui.new(
-                  :app_name => 'Batali',
-                  :output_to => StringIO.new(output)
+                  :file => batali_file,
+                  :path => vendor_path,
+                  :update => {
+                    :install => true,
+                    :environment => ENV['KITCHEN_BATALI_ENVIRONMENT'],
+                    :infrastructure => false
+                  },
+                  :ui => Bogo::Ui.new(
+                    :app_name => 'Batali',
+                    :output_to => StringIO.new(output)
+                  ),
                 ),
-              ),
                 []
               ).execute!
             end
           rescue => e
             error "Batali failed to install cookbooks! #{e.class}: #{e}"
+            raise e
           end
           debug "Batali output:\n#{output}"
         end
